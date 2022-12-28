@@ -221,8 +221,8 @@ function get_functions(root) {
                     }
                 }
             }
-            functionList.push({ label: label, parameters: params.map(x => { return { label: x } }) });
         }
+        functionList.push({ label: label, parameters: params.map(x => { return { label: x } }) });
     }
     root.body.forEach(element => {
         get_functions(element);
@@ -308,6 +308,7 @@ connection.onSignatureHelp((SignatureHelpParams) => {
     let toMatchText = undefined;
     text.split('\n').forEach((line, index) => {
         if (index == SignatureHelpParams.position.line) {
+            // 此处的匹配是有问题的，应该判断函数去掉已有参数部分的名称，并且前导的乱七八糟的东西都得去掉
             toMatchText = line;
         }
         else {
@@ -323,6 +324,7 @@ connection.onSignatureHelp((SignatureHelpParams) => {
     };
     functionList.forEach(item => {
         if (item.label.startsWith(toMatchText)) {
+            // 这里应该考虑参数的匹配，已输入的参数的数量
             resultList.signatures.push(item);
         }
     });
