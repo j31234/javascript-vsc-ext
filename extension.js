@@ -15,7 +15,7 @@ const tokenModifiers = [
 ];
 
 // exports.getTokenType = getTokenType;
-const getTokenType = require('./utils').getTokenType
+const { getTokenType } = require('./utils')
 const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 const semanticProvider = {
     provideDocumentSemanticTokens(document) {

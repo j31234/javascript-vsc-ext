@@ -2,7 +2,7 @@ const node_1 = require("vscode-languageserver/node");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
 const get_tokens = require("../lexer");
 const get_AST = require("../parser");
-const getTokenType = require('../utils').getTokenType
+const { keywords, keyobjects, keyfuncs } = require('../utils')
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -195,26 +195,18 @@ connection.onCompletion((_textDocumentPosition) => {
     // info and always provide the same completion items.
     let document = documents.get(_textDocumentPosition.textDocument.uri);
     const text = document.getText();
-    // var tokens = get_tokens(text);
     var AST = get_AST(text);
-    // console.log(AST);
     get_variables(AST);
-    // tokens = tokens.filter(item => item.text !== '<EOF>');
-    // const last_token = tokens.pop();
-    // console.log(last_token);
-    // let variableList = [];
-    // let returnList = [];
-    // tokens.forEach(token => {
-    //     const tokenType = getTokenType(token.type);
-    //         if (tokenType === "variable") {
-    //             // console.log(token.text);
-    //             if (variableList.indexOf(token.text) == -1) {
-    //                 variableList.push(token.text);
-    //                 returnList.push({ label: token.text, kind:node_1.CompletionItemKind.Text,})
-    //             }
-    //         }
-    //     }
-    // )
+
+    keywords.forEach(item => {
+        completionList.push({ label: item, kind: node_1.CompletionItemKind.Keyword, })
+    });
+    keyobjects.forEach(item => {
+        completionList.push({ label: item, kind: node_1.CompletionItemKind.Class, })
+    });
+    keyfuncs.forEach(item => {
+        completionList.push({ label: item, kind: node_1.CompletionItemKind.Function, })
+    }); 
     return completionList;
 });
 // This handler resolves additional information for the item selected in

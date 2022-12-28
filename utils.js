@@ -17,3 +17,11 @@ function getTokenType(token_type) {
         return "other";
 }
 exports.getTokenType = getTokenType;
+
+const keywords = ['abstract', 'arguments', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class*', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'double', 'else', 'enum*', 'eval', 'export*', 'extends*', 'false', 'final', 'finally', 'float', 'for', 'function', 'goto', 'if', 'implements', 'import*', 'in', 'instanceof', 'int', 'interface', 'let', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'super*', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'true', 'try', 'typeof', 'var', 'void', 'volatile', 'while', 'with', 'yield']
+const keyobjects = ['Array', 'Date', 'Math', 'Number','Object', 'String', 'Infinity']
+const keyfuncs = ['eval', 'hasOwnProperty', 'isFinite', 'isNaN', 'isPrototypeOf', 'length', 'NaN', 'name', 'prototype', 'toString', 'undefined', 'valueOf']
+
+exports.keywords = keywords;
+exports.keyobjects = keyobjects;
+exports.keyfuncs = keyfuncs;
