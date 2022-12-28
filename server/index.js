@@ -3,6 +3,7 @@ const vscode_languageserver_textdocument_1 = require("vscode-languageserver-text
 
 
 const get_tokens = require("../lexer");
+const get_AST = require("../parser");
 const getTokenType = require('../utils').getTokenType
 // const { getTokenType } = require("../extension")
 // Create a connection for the server, using Node's IPC as a transport.
@@ -149,6 +150,45 @@ connection.onDidChangeWatchedFiles(_change => {
     // Monitored files have change in VSCode
     connection.console.log('We received an file change event');
 });
+var completionList = [];
+function get_variables(root) {
+    if (typeof (root) == "string") return;
+
+    if (root.type == 'program') {
+        completionList = [];
+    }
+    // variable
+    if (root.type == 'variableDeclaration')
+    {
+        let varName = root.body[0].body[0].body[0]; // variableDeclaration -> assignable -> identifier
+        completionList.push({ label: varName, kind:node_1.CompletionItemKind.Variable,})
+        return;
+    }
+    // class
+    else if (root.type == 'classDeclaration'){
+        let varName = root.body[1].body[0]; // classDeclaration[1] -> identifier
+        completionList.push({ label: varName, kind:node_1.CompletionItemKind.Class,})
+        return;
+    }
+    // function
+    else if (root.type == 'functionDeclaration') {
+        root.body.forEach(item => {
+            if (item.type == 'identifier') {
+                completionList.push({ label: item.body[0], kind: node_1.CompletionItemKind.Function, });
+                return;
+            }
+        })
+        return;
+    }
+    
+    
+    if (typeof (root.body[0]) == "string") {
+        return;
+    }
+    root.body.forEach(element => {
+        get_variables(element);
+    });
+}
 // TODO: code completion
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition) => {
@@ -157,38 +197,27 @@ connection.onCompletion((_textDocumentPosition) => {
     // info and always provide the same completion items.
     let document = documents.get(_textDocumentPosition.textDocument.uri);
     const text = document.getText();
-    const tokens = get_tokens(text);
-    let variableList = [];
-    let returnList = [];
-    tokens.forEach(token => {
-        const tokenType = getTokenType(token.type);
-            if (tokenType === "variable") {
-                console.log(token.text);
-                if (variableList.indexOf(token.text) == -1) {
-                    variableList.push(token.text);
-                    returnList.push({ label: token.text, kind:node_1.CompletionItemKind.Text,})
-                }
-            }
-        }
-    )
-    // let returnList = [
-    //     {
-    //         label: 'TypeScript',
-    //         kind: node_1.CompletionItemKind.Text,
-    //         data: 1
-    //     },
-    //     {
-    //         label: 'JavaScript',
-    //         kind: node_1.CompletionItemKind.Text,
-    //         data: 2
-    //     },
-    //     {
-    //         label: 'QwQCompletion',
-    //         kind: node_1.CompletionItemKind.Function,
-    //         data: 3
+    // var tokens = get_tokens(text);
+    var AST = get_AST(text);
+    // console.log(AST);
+    get_variables(AST);
+    // tokens = tokens.filter(item => item.text !== '<EOF>');
+    // const last_token = tokens.pop();
+    // console.log(last_token);
+    // let variableList = [];
+    // let returnList = [];
+    // tokens.forEach(token => {
+    //     const tokenType = getTokenType(token.type);
+    //         if (tokenType === "variable") {
+    //             // console.log(token.text);
+    //             if (variableList.indexOf(token.text) == -1) {
+    //                 variableList.push(token.text);
+    //                 returnList.push({ label: token.text, kind:node_1.CompletionItemKind.Text,})
+    //             }
+    //         }
     //     }
-    // ];
-    return returnList;
+    // )
+    return completionList;
 });
 // This handler resolves additional information for the item selected in
 // the completion list.
