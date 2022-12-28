@@ -183,6 +183,7 @@ function get_functions(root) {
     if (typeof (root) == "string") return;
 
     if (root.type == 'functionDeclaration') {
+        // console.log("functionDeclaration");
         let son = root.body;
         let len = son.length;
         let label = '';
@@ -190,7 +191,7 @@ function get_functions(root) {
         for (let i = 0; i < len; i++){
             if (son[i].type == 'identifier')
             {
-                console.log('qwq');
+                // console.log('qwq');
                 label += son[i].body[0]; // functionname
                 /*
                     formalParameterList
@@ -204,9 +205,9 @@ function get_functions(root) {
                 */
                 while (true) {
                     i++;
-                    if (son[i].text == '(') label += son[i].text;
-                    else if (son[i].text == ')') {
-                        label += son[i].text;
+                    if (son[i] == '(') label += son[i];
+                    else if (son[i] == ')') {
+                        label += son[i];
                         break;
                     }
                     else if (son[i].type == 'formalParameterList') {
@@ -223,10 +224,10 @@ function get_functions(root) {
             functionList.push({ label: label, parameters: params.map(x => { return { label: x } }) });
         }
     }
-    
     root.body.forEach(element => {
-        get_variables(element);
+        get_functions(element);
     });
+    // console.log(functionList);
 }
 function get_lib(text) {
     var tokens = get_tokens(text);
@@ -303,11 +304,29 @@ connection.onCompletionResolve((item) => {
 connection.onSignatureHelp((SignatureHelpParams) => {
     let document = documents.get(SignatureHelpParams.textDocument.uri);
     const text = document.getText();
-    var AST = get_AST(text);
+    let resultText = '';
+    let toMatchText = undefined;
+    text.split('\n').forEach((line, index) => {
+        if (index == SignatureHelpParams.position.line) {
+            toMatchText = line;
+        }
+        else {
+            resultText += line + '\n';
+        }
+    });
+    var AST = get_AST(resultText);
     functionList = [];
     get_functions(AST);
     console.log(functionList);
-    return functionList;
+    resultList = {
+        signatures: [],
+    };
+    functionList.forEach(item => {
+        if (item.label.startsWith(toMatchText)) {
+            resultList.signatures.push(item);
+        }
+    });
+    return resultList;
     // return {
     //     signatures: [
     //         {
