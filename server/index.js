@@ -180,6 +180,30 @@ connection.onCompletionResolve((item) => {
     }
     return item;
 });
+connection.onSignatureHelp((SignatureHelpParams) => {
+    return {
+        signatures: [
+            {
+                label: 'QwQSignature(qwq0, qwq1)',
+                documentation: 'QwQSignature documentation, a sample function signature',
+                parameters: [
+                    {
+                        label: 'qwq0',
+                        documentation: 'qwq0 documentation'
+                    },
+                    {
+                        label: 'qwq1',
+                        documentation: 'qwq1 documentation'
+                    }
+                ]
+            }
+        ],
+        activeSignature: 0,
+        activeParameter: 0
+    };
+})
+
+
 // Make the text document manager listen on the connection
 // for open, change and close text document events
 documents.listen(connection);
