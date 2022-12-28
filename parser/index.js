@@ -23,6 +23,7 @@ function get_AST(data)
         return;
       }
       ret['type'] = ruleNames[ctx.ruleIndex];
+      ret['text'] = ctx.getText();
       if (ctx.children) {
         ret['body'] = [];
         ctx.children.forEach(child => {

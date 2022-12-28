@@ -152,9 +152,6 @@ var completionList = [];
 function get_variables(root) {
     if (typeof (root) == "string") return;
 
-    // if (root.type == 'program') {
-    //     completionList = [];
-    // }
     // variable
     if (root.type == 'variableDeclaration')
     {
@@ -175,6 +172,56 @@ function get_variables(root) {
                 return;
             }
         })
+    }
+    
+    root.body.forEach(element => {
+        get_variables(element);
+    });
+}
+var functionList = [];
+function get_functions(root) {
+    if (typeof (root) == "string") return;
+
+    if (root.type == 'functionDeclaration') {
+        let son = root.body;
+        let len = son.length;
+        let label = '';
+        let params = [];
+        for (let i = 0; i < len; i++){
+            if (son[i].type == 'identifier')
+            {
+                console.log('qwq');
+                label += son[i].body[0]; // functionname
+                /*
+                    formalParameterList
+                    : formalParameterArg (',' formalParameterArg)* (',' lastFormalParameterArg)?
+                    | lastFormalParameterArg
+                    ;
+                    
+                    formalParameterArg
+                    : assignable ('=' singleExpression)?      // ECMAScript 6: Initialization
+                    ;
+                */
+                while (true) {
+                    i++;
+                    if (son[i].text == '(') label += son[i].text;
+                    else if (son[i].text == ')') {
+                        label += son[i].text;
+                        break;
+                    }
+                    else if (son[i].type == 'formalParameterList') {
+                        label += son[i].text;
+
+                        son[i].body.forEach(item => {
+                            if (item.type == 'formalParameterArg') {
+                                params.push(item.text);
+                            }
+                        })
+                    }
+                }
+            }
+            functionList.push({ label: label, parameters: params.map(x => { return { label: x } }) });
+        }
     }
     
     root.body.forEach(element => {
@@ -254,28 +301,34 @@ connection.onCompletionResolve((item) => {
     return item;
 });
 connection.onSignatureHelp((SignatureHelpParams) => {
-    return {
-        signatures: [
-            {
-                label: 'QwQSignature(qwq0, qwq1)',
-                documentation: 'QwQSignature documentation, a sample function signature',
-                parameters: [
-                    {
-                        label: 'qwq0',
-                        documentation: 'qwq0 documentation'
-                    },
-                    {
-                        label: 'qwq1',
-                        documentation: 'qwq1 documentation'
-                    }
-                ]
-            }
-        ],
-        activeSignature: 0,
-        activeParameter: 0
-    };
+    let document = documents.get(SignatureHelpParams.textDocument.uri);
+    const text = document.getText();
+    var AST = get_AST(text);
+    functionList = [];
+    get_functions(AST);
+    console.log(functionList);
+    return functionList;
+    // return {
+    //     signatures: [
+    //         {
+    //             label: 'QwQSignature(qwq0, qwq1)',
+    //             documentation: 'QwQSignature documentation, a sample function signature',
+    //             parameters: [
+    //                 {
+    //                     label: 'qwq0',
+    //                     documentation: 'qwq0 documentation'
+    //                 },
+    //                 {
+    //                     label: 'qwq1',
+    //                     documentation: 'qwq1 documentation'
+    //                 }
+    //             ]
+    //         }
+    //     ],
+    //     activeSignature: 0,
+    //     activeParameter: 0
+    // };
 })
-
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
