@@ -33,7 +33,7 @@ function getTokenType(token_type) {
 }
 
 const legend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
-const provider = {
+const semanticProvider = {
     provideDocumentSemanticTokens(document) {
         // analyze the document and return semantic tokens
         const tokensBuilder = new vscode.SemanticTokensBuilder(legend);
@@ -65,11 +65,20 @@ const provider = {
         return tokensBuilder.build();
     },
 };
+const signatureHelpProvider = {
+    provideSignatureHelp(document, position, token) {
+        let res = new vscode.SignatureHelp();
+    }
+};
 function startSemanticTokensProvider(context) {
-    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: "custom_javascript" }, provider, legend));
+    context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: "custom_javascript" }, semanticProvider, legend));
+}
+function startSignatureHelpProvider(context) {
+    context.subscriptions.push(vscode.languages.registerSignatureHelpProvider({ language: "custom_javascript" }, signatureHelpProvider, '(', ','));
 }
 function activate(context) {
     startSemanticTokensProvider(context);
+    startSignatureHelpProvider(context);
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(path.join("server", "index.js"));
     // The debug options for the server
