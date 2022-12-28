@@ -1,0 +1,3 @@
+// number / string literal have different color
+const a = 1.23;
+const b = "qwq";
