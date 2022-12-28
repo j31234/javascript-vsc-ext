@@ -2,7 +2,7 @@ const node_1 = require("vscode-languageserver/node");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
 const get_tokens = require("../lexer");
 const get_AST = require("../parser");
-const { keywords, keyobjects, keyfuncs } = require('../utils')
+const { keywords, keyobjects, keyfunctions, lib } = require('../utils')
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -152,9 +152,9 @@ var completionList = [];
 function get_variables(root) {
     if (typeof (root) == "string") return;
 
-    if (root.type == 'program') {
-        completionList = [];
-    }
+    // if (root.type == 'program') {
+    //     completionList = [];
+    // }
     // variable
     if (root.type == 'variableDeclaration')
     {
@@ -166,7 +166,6 @@ function get_variables(root) {
     else if (root.type == 'classDeclaration'){
         let varName = root.body[1].body[0]; // classDeclaration[1] -> identifier
         completionList.push({ label: varName, kind:node_1.CompletionItemKind.Class,})
-        return;
     }
     // function
     else if (root.type == 'functionDeclaration') {
@@ -176,37 +175,69 @@ function get_variables(root) {
                 return;
             }
         })
-        return;
     }
     
-    
-    if (typeof (root.body[0]) == "string") {
-        return;
-    }
     root.body.forEach(element => {
         get_variables(element);
     });
+}
+function get_lib(text) {
+    var tokens = get_tokens(text);
+    tokens = tokens.filter(item => item.text !== '<EOF>');
+    const token3 = tokens.pop();
+    const token2 = tokens.pop();
+    const token1 = tokens.pop();
+
+    if (token1 && token2 && token3 && token2.text == '.') {
+        let libName = token1.text;
+        if (libName in lib) {
+            return lib[libName];
+        }
+    }
+    return undefined;
 }
 // TODO: code completion
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition) => {
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items.
+    // info and always provide the same completion items. 
+    completionList = [];
     let document = documents.get(_textDocumentPosition.textDocument.uri);
     const text = document.getText();
-    var AST = get_AST(text);
-    get_variables(AST);
 
-    keywords.forEach(item => {
-        completionList.push({ label: item, kind: node_1.CompletionItemKind.Keyword, })
-    });
-    keyobjects.forEach(item => {
-        completionList.push({ label: item, kind: node_1.CompletionItemKind.Class, })
-    });
-    keyfuncs.forEach(item => {
-        completionList.push({ label: item, kind: node_1.CompletionItemKind.Function, })
-    }); 
+    let result = get_lib(text);
+    // completion lib member
+    if (result) {
+        console.log(result);
+        if ('variables' in result) {
+            result.variables.forEach(item => {
+                completionList.push({ label: item, kind: node_1.CompletionItemKind.Variable, })
+            })
+        }
+        if ('functions' in result) {
+            result.functions.forEach(item => {
+                completionList.push({ label: item, kind: node_1.CompletionItemKind.Function, })
+            })
+        }
+    }
+    // completion keywords etc.
+    else {
+        var AST = get_AST(text);
+        get_variables(AST);
+        keywords.forEach(item => {
+            completionList.push({ label: item, kind: node_1.CompletionItemKind.Keyword, })
+        });
+        keyobjects.forEach(item => {
+            completionList.push({ label: item, kind: node_1.CompletionItemKind.Class, })
+        });
+        keyfunctions.forEach(item => {
+            completionList.push({ label: item, kind: node_1.CompletionItemKind.Function, })
+        });
+        Object.keys(lib).forEach(item => {
+            completionList.push({ label: item, kind: node_1.CompletionItemKind.Class, })
+        });
+    }
     return completionList;
 });
 // This handler resolves additional information for the item selected in

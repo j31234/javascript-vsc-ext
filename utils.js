@@ -18,10 +18,13 @@ function getTokenType(token_type) {
 }
 exports.getTokenType = getTokenType;
 
-const keywords = ['abstract', 'arguments', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class*', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'double', 'else', 'enum*', 'eval', 'export*', 'extends*', 'false', 'final', 'finally', 'float', 'for', 'function', 'goto', 'if', 'implements', 'import*', 'in', 'instanceof', 'int', 'interface', 'let', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'super*', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'true', 'try', 'typeof', 'var', 'void', 'volatile', 'while', 'with', 'yield']
-const keyobjects = ['Array', 'Date', 'Math', 'Number','Object', 'String', 'Infinity']
-const keyfuncs = ['eval', 'hasOwnProperty', 'isFinite', 'isNaN', 'isPrototypeOf', 'length', 'NaN', 'name', 'prototype', 'toString', 'undefined', 'valueOf']
+const keywords = ['abstract', 'arguments', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class*', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'double', 'else', 'enum*', 'eval', 'export*', 'extends*', 'false', 'final', 'finally', 'float', 'for', 'function', 'goto', 'if', 'implements', 'import*', 'in', 'instanceof', 'int', 'interface', 'let', 'long', 'native', 'new', 'null', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'super*', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'true', 'try', 'typeof', 'var', 'void', 'volatile', 'while', 'with', 'yield'];
+const keyobjects = ['Array', 'Date', 'Number', 'Object', 'String', 'Infinity', 'NaN'];
+const keyfunctions = ['eval', 'hasOwnProperty', 'isFinite', 'isNaN', 'isPrototypeOf', 'length', 'name', 'prototype', 'toString', 'undefined', 'valueOf', 'require', 'eval', 'parseInt'];
 
 exports.keywords = keywords;
 exports.keyobjects = keyobjects;
-exports.keyfuncs = keyfuncs;
+exports.keyfunctions = keyfunctions;
+
+const lib = { console: { functions: ['log', 'warn', 'error', 'info'] }, Math: { variables: ['PI', 'E', 'LN2', 'LN10', 'SQRT2'], functions: ['floor', 'round', 'sin', 'abs', 'cos', 'exp', 'log', 'max', 'min', 'pow', 'tan', 'sqrt'] } }
+exports.lib = lib
