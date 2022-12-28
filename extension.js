@@ -50,11 +50,6 @@ const semanticProvider = {
         return tokensBuilder.build();
     },
 };
-const signatureHelpProvider = {
-    provideSignatureHelp(document, position, token) {
-        let res = new vscode.SignatureHelp();
-    }
-};
 function startSemanticTokensProvider(context) {
     context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: "custom_javascript" }, semanticProvider, legend));
 }
