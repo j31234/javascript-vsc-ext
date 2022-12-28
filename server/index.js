@@ -1,5 +1,10 @@
 const node_1 = require("vscode-languageserver/node");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
+
+
+const get_tokens = require("../lexer");
+const getTokenType = require('../utils').getTokenType
+// const { getTokenType } = require("../extension")
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = (0, node_1.createConnection)(node_1.ProposedFeatures.all);
@@ -139,6 +144,7 @@ async function validateTextDocument(textDocument) {
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
     */
 }
+
 connection.onDidChangeWatchedFiles(_change => {
     // Monitored files have change in VSCode
     connection.console.log('We received an file change event');
@@ -149,23 +155,40 @@ connection.onCompletion((_textDocumentPosition) => {
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
     // info and always provide the same completion items.
-    return [
-        {
-            label: 'TypeScript',
-            kind: node_1.CompletionItemKind.Text,
-            data: 1
-        },
-        {
-            label: 'JavaScript',
-            kind: node_1.CompletionItemKind.Text,
-            data: 2
-        },
-        {
-            label: 'QwQCompletion',
-            kind: node_1.CompletionItemKind.Function,
-            data: 3
+    let document = documents.get(_textDocumentPosition.textDocument.uri);
+    const text = document.getText();
+    const tokens = get_tokens(text);
+    let variableList = [];
+    let returnList = [];
+    tokens.forEach(token => {
+        const tokenType = getTokenType(token.type);
+            if (tokenType === "variable") {
+                console.log(token.text);
+                if (variableList.indexOf(token.text) == -1) {
+                    variableList.push(token.text);
+                    returnList.push({ label: token.text, kind:node_1.CompletionItemKind.Text,})
+                }
+            }
         }
-    ];
+    )
+    // let returnList = [
+    //     {
+    //         label: 'TypeScript',
+    //         kind: node_1.CompletionItemKind.Text,
+    //         data: 1
+    //     },
+    //     {
+    //         label: 'JavaScript',
+    //         kind: node_1.CompletionItemKind.Text,
+    //         data: 2
+    //     },
+    //     {
+    //         label: 'QwQCompletion',
+    //         kind: node_1.CompletionItemKind.Function,
+    //         data: 3
+    //     }
+    // ];
+    return returnList;
 });
 // This handler resolves additional information for the item selected in
 // the completion list.
