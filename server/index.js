@@ -1,9 +1,7 @@
 const node_1 = require("vscode-languageserver/node");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
-
-
 const get_tokens = require("../lexer");
-const getTokenType = require('../utils').getTokenType
+const getTokenType = require('../utils').getTokenType;
 // const { getTokenType } = require("../extension")
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
