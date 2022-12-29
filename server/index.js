@@ -173,7 +173,7 @@ function get_variables(root) {
             }
         })
     }
-    
+
     root.body.forEach(element => {
         get_variables(element);
     });
@@ -198,7 +198,7 @@ function get_functions(root) {
                     : formalParameterArg (',' formalParameterArg)* (',' lastFormalParameterArg)?
                     | lastFormalParameterArg
                     ;
-                    
+
                     formalParameterArg
                     : assignable ('=' singleExpression)?      // ECMAScript 6: Initialization
                     ;
@@ -249,7 +249,7 @@ function get_lib(text) {
 connection.onCompletion((_textDocumentPosition) => {
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items. 
+    // info and always provide the same completion items.
     completionList = [];
     let document = documents.get(_textDocumentPosition.textDocument.uri);
     const text = document.getText();
@@ -321,14 +321,33 @@ connection.onSignatureHelp((SignatureHelpParams) => {
     console.log(functionList);
     resultList = {
         signatures: [],
+        activeSignature: 0,
+        activeParameter: 0
     };
-    functionList.forEach(item => {
-        if (item.label.startsWith(toMatchText)) {
-            // 这里应该考虑参数的匹配，已输入的参数的数量
-            resultList.signatures.push(item);
-        }
-    });
-    return resultList;
+
+    try
+    {
+        const function_statement_tokens = get_tokens(toMatchText);
+        const function_name = function_statement_tokens.filter(item => item.type == 'Identifier')[0].text;
+        const cursor_position = SignatureHelpParams.position.character;
+        const comma_count = function_statement_tokens.filter(item => item.type == 'Comma' && item.start < cursor_position).length;
+        resultList.activeParameter = comma_count;
+
+        functionList.forEach(item => {
+            if (item.label.startsWith(function_name)) {
+                // 这里应该考虑参数的匹配，已输入的参数的数量
+                resultList.signatures.push(item);
+            }
+        });
+        return resultList;
+    } catch (error) {
+        return {
+            signatures: [],
+            activeSignature: 0,
+            activeParameter: 0
+        };
+    }
+
     // return {
     //     signatures: [
     //         {
